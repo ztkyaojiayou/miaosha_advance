@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.imooc.miaosha.dao.UserDao;
-import com.imooc.miaosha.domain.User;
+import com.imooc.miaosha.bean.User;
 
 @Service
 public class UserService {

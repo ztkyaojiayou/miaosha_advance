@@ -1,7 +1,7 @@
 package com.imooc.miaosha.redis;
 
 public class OrderKey extends BasePrefix {
-
+//订单key
 	public OrderKey(String prefix) {
 		super(prefix);
 	}

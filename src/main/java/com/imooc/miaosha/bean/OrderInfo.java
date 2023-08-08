@@ -1,7 +1,8 @@
-package com.imooc.miaosha.domain;
+package com.imooc.miaosha.bean;
 
 import java.util.Date;
 
+//订单详情bean
 public class OrderInfo {
 	private Long id;
 	private Long userId;

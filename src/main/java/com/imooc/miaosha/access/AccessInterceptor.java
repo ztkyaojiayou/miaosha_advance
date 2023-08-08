@@ -13,38 +13,46 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import com.alibaba.fastjson.JSON;
-import com.imooc.miaosha.domain.MiaoshaUser;
+import com.imooc.miaosha.bean.MiaoshaUser;
 import com.imooc.miaosha.redis.AccessKey;
 import com.imooc.miaosha.redis.RedisService;
 import com.imooc.miaosha.result.CodeMsg;
 import com.imooc.miaosha.result.Result;
-import com.imooc.miaosha.service.MiaoshaUserService;
+import com.imooc.miaosha.service.LoginService;
 
+/**
+ * 自定义一个拦截器（用于拦截用户请求）
+ * 目的：（前端）接口防刷（即限制用户点击秒杀按钮的次数（如5秒钟内只能请求5次））
+ */
 @Service
 public class AccessInterceptor  extends HandlerInterceptorAdapter{
 	
 	@Autowired
-	MiaoshaUserService userService;
+	LoginService userService;
 	
 	@Autowired
 	RedisService redisService;
-	
+
+	//每个加了该注解的方法在执行之前要先执行的代码
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 		if(handler instanceof HandlerMethod) {
+			//1.先获取用户信息
 			MiaoshaUser user = getUser(request, response);
-			UserContext.setUser(user);
+			UserContext.setUser(user);//因为是static的，因此可以直接用类名调用
 			HandlerMethod hm = (HandlerMethod)handler;
-			AccessLimit accessLimit = hm.getMethodAnnotation(AccessLimit.class);
+			AccessLimit accessLimit = hm.getMethodAnnotation(AccessLimit.class);//获取注解名
 			if(accessLimit == null) {
 				return true;
 			}
+			//2.再设置注解中的变量
 			int seconds = accessLimit.seconds();
 			int maxCount = accessLimit.maxCount();
 			boolean needLogin = accessLimit.needLogin();
 			String key = request.getRequestURI();
 			if(needLogin) {
+				//若用户为空
 				if(user == null) {
 					render(response, CodeMsg.SESSION_ERROR);
 					return false;
@@ -76,9 +84,10 @@ public class AccessInterceptor  extends HandlerInterceptorAdapter{
 		out.close();
 	}
 
+	//（根据token）获取用户信息的具体实现
 	private MiaoshaUser getUser(HttpServletRequest request, HttpServletResponse response) {
-		String paramToken = request.getParameter(MiaoshaUserService.COOKI_NAME_TOKEN);
-		String cookieToken = getCookieValue(request, MiaoshaUserService.COOKI_NAME_TOKEN);
+		String paramToken = request.getParameter(LoginService.COOKI_NAME_TOKEN);
+		String cookieToken = getCookieValue(request, LoginService.COOKI_NAME_TOKEN);
 		if(StringUtils.isEmpty(cookieToken) && StringUtils.isEmpty(paramToken)) {
 			return null;
 		}

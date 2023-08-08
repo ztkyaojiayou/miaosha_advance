@@ -6,14 +6,15 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.imooc.miaosha.domain.MiaoshaOrder;
-import com.imooc.miaosha.domain.MiaoshaUser;
+import com.imooc.miaosha.bean.MiaoshaOrder;
+import com.imooc.miaosha.bean.MiaoshaUser;
 import com.imooc.miaosha.redis.RedisService;
 import com.imooc.miaosha.service.GoodsService;
 import com.imooc.miaosha.service.MiaoshaService;
 import com.imooc.miaosha.service.OrderService;
 import com.imooc.miaosha.vo.GoodsVo;
 
+//接收秒杀信息，异步（真正）处理：减库存 下订单 写入秒杀订单
 @Service
 public class MQReceiver {
 
@@ -31,10 +32,12 @@ public class MQReceiver {
 		@Autowired
 		MiaoshaService miaoshaService;
 		
-		@RabbitListener(queues=MQConfig.MIAOSHA_QUEUE)
-		public void receive(String message) {
+		@RabbitListener(queues=MQConfig.MIAOSHA_QUEUE)//监听MIAOSHA_QUEUE这个队列
+		public void receive(String message) {//1.先接收到这个消息
 			log.info("receive message:"+message);
+			//2.再还原成MiaoshaMessage对象
 			MiaoshaMessage mm  = RedisService.stringToBean(message, MiaoshaMessage.class);
+			//3.获取此消息的内容
 			MiaoshaUser user = mm.getUser();
 			long goodsId = mm.getGoodsId();
 			
@@ -43,15 +46,16 @@ public class MQReceiver {
 	    	if(stock <= 0) {
 	    		return;
 	    	}
-	    	//判断是否已经秒杀到了
+	    	//4.先判断用户是否重复秒杀
 	    	MiaoshaOrder order = orderService.getMiaoshaOrderByUserIdGoodsId(user.getId(), goodsId);
-	    	if(order != null) {
+	    	if(order != null) {//说明该用户重复秒杀，禁止之后的一切操作
 	    		return;
 	    	}
-	    	//减库存 下订单 写入秒杀订单
+	    	//5.(若为第一次秒杀）正式减库存 下订单 写入秒杀订单（核心重点）
 	    	miaoshaService.miaosha(user, goods);
 		}
 	
+//		rabbitMQ有四种消息模式的演示：
 //		@RabbitListener(queues=MQConfig.QUEUE)
 //		public void receive(String message) {
 //			log.info("receive message:"+message);

@@ -1,5 +1,6 @@
-package com.imooc.miaosha.domain;
+package com.imooc.miaosha.bean;
 
+//普通用户bean
 public class User {
 	private int id;
 	private String name;

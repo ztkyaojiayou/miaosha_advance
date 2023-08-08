@@ -6,21 +6,23 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.imooc.miaosha.domain.MiaoshaUser;
+import com.imooc.miaosha.bean.MiaoshaUser;
 import com.imooc.miaosha.redis.RedisService;
 import com.imooc.miaosha.result.Result;
-import com.imooc.miaosha.service.MiaoshaUserService;
+import com.imooc.miaosha.service.LoginService;
 
+//获取用户信息（压测时使用了）
 @Controller
 @RequestMapping("/user")
 public class UserController {
 
 	@Autowired
-	MiaoshaUserService userService;
+    LoginService userService;
 	
 	@Autowired
 	RedisService redisService;
-	
+
+
     @RequestMapping("/info")
     @ResponseBody
     public Result<MiaoshaUser> info(Model model,MiaoshaUser user) {

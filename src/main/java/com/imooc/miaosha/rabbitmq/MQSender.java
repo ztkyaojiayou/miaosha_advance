@@ -8,17 +8,19 @@ import org.springframework.stereotype.Service;
 
 import com.imooc.miaosha.redis.RedisService;
 
+//发送秒杀信息MiaoshaMessage
 @Service
 public class MQSender {
 
 	private static Logger log = LoggerFactory.getLogger(MQSender.class);
 	
 	@Autowired
-	AmqpTemplate amqpTemplate ;
+	AmqpTemplate amqpTemplate ;//注入Rabbit消息队列服务，就可以使用消息队列啦
 	
 	public void sendMiaoshaMessage(MiaoshaMessage mm) {
-		String msg = RedisService.beanToString(mm);
+		String msg = RedisService.beanToString(mm);//把bean对象转化成string对象
 		log.info("send message:"+msg);
+		//发送消息（重点），另一端则接收此消息（MQReceiver）
 		amqpTemplate.convertAndSend(MQConfig.MIAOSHA_QUEUE, msg);
 	}
 	

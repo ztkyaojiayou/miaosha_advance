@@ -12,6 +12,7 @@ import org.springframework.amqp.core.TopicExchange;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+//消息队列配置（属于基本知识的讲解）
 @Configuration
 public class MQConfig {
 	
@@ -25,7 +26,8 @@ public class MQConfig {
 	public static final String HEADERS_EXCHANGE = "headersExchage";
 	
 	/**
-	 * Direct模式 交换机Exchange
+	 * rabbitMQ有四种消息模式：
+	 * 1.Direct模式 交换机Exchange
 	 * */
 	@Bean
 	public Queue queue() {
@@ -33,7 +35,7 @@ public class MQConfig {
 	}
 	
 	/**
-	 * Topic模式 交换机Exchange
+	 * 2.Topic模式 交换机Exchange
 	 * */
 	@Bean
 	public Queue topicQueue1() {
@@ -56,7 +58,7 @@ public class MQConfig {
 		return BindingBuilder.bind(topicQueue2()).to(topicExchage()).with("topic.#");
 	}
 	/**
-	 * Fanout模式 交换机Exchange
+	 * 3.Fanout模式 交换机Exchange
 	 * */
 	@Bean
 	public FanoutExchange fanoutExchage(){
@@ -71,7 +73,7 @@ public class MQConfig {
 		return BindingBuilder.bind(topicQueue2()).to(fanoutExchage());
 	}
 	/**
-	 * Header模式 交换机Exchange
+	 * 4.Header模式 交换机Exchange
 	 * */
 	@Bean
 	public HeadersExchange headersExchage(){

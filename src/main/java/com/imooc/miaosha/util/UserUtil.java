@@ -1,28 +1,22 @@
 package com.imooc.miaosha.util;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.imooc.miaosha.bean.MiaoshaUser;
+
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.imooc.miaosha.domain.MiaoshaUser;
-
+//生成海量用户/token的工具包，用于并发测试（重点）
 public class UserUtil {
-	
+    //1.生成用户，把生成的用户存入list集合当中
 	private static void createUser(int count) throws Exception{
+		//创建一个list集合，用于存放所有用户
 		List<MiaoshaUser> users = new ArrayList<MiaoshaUser>(count);
-		//生成用户
 		for(int i=0;i<count;i++) {
 			MiaoshaUser user = new MiaoshaUser();
 			user.setId(13000000000L+i);
@@ -31,10 +25,10 @@ public class UserUtil {
 			user.setRegisterDate(new Date());
 			user.setSalt("1a2b3c");
 			user.setPassword(MD5Util.inputPassToDbPass("123456", user.getSalt()));
-			users.add(user);
+			users.add(user);//把生成的用户存入list集合当中
 		}
 		System.out.println("create user");
-//		//插入数据库
+//		//把这些用户存入数据库
 //		Connection conn = DBUtil.getConn();
 //		String sql = "insert into miaosha_user(login_count, nickname, register_date, salt, password, id)values(?,?,?,?,?,?)";
 //		PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -51,8 +45,8 @@ public class UserUtil {
 //		pstmt.executeBatch();
 //		pstmt.close();
 //		conn.close();
-//		System.out.println("insert to db");
-		//登录，生成token
+		System.out.println("insert to db");
+		//2.登录（目的：生成各个用户的token，放在D:/tokens.txt中（因为“海量用户秒杀”进行压测时，需要token（不同的用户对于不同的token）））
 		String urlString = "http://localhost:8080/login/do_login";
 		File file = new File("D:/tokens.txt");
 		if(file.exists()) {
@@ -68,7 +62,7 @@ public class UserUtil {
 			co.setRequestMethod("POST");
 			co.setDoOutput(true);
 			OutputStream out = co.getOutputStream();
-			String params = "mobile="+user.getId()+"&password="+MD5Util.inputPassToFormPass("123456");
+			String params = "mobile="+user.getId()+"&password="+ MD5Util.inputPassToFormPass("123456");
 			out.write(params.getBytes());
 			out.flush();
 			InputStream inputStream = co.getInputStream();
@@ -95,7 +89,8 @@ public class UserUtil {
 		
 		System.out.println("over");
 	}
-	
+
+	//创建5000个用户，并登陆，用于jmeter作压力测试
 	public static void main(String[] args)throws Exception {
 		createUser(5000);
 	}

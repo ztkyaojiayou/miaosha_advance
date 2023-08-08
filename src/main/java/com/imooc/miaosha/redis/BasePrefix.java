@@ -2,9 +2,9 @@ package com.imooc.miaosha.redis;
 
 public abstract class BasePrefix implements KeyPrefix{
 	
-	private int expireSeconds;
+	private int expireSeconds;//过期时间
 	
-	private String prefix;
+	private String prefix;//前缀
 	
 	public BasePrefix(String prefix) {//0代表永不过期
 		this(0, prefix);

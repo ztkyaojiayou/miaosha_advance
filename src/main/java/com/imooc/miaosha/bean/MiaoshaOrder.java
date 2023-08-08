@@ -1,5 +1,7 @@
-package com.imooc.miaosha.domain;
+package com.imooc.miaosha.bean;
 
+//秒杀订单bean
+//作用：利用商品ID（goodsId）、用户ID（userId）生成一个唯一索引，防止超卖
 public class MiaoshaOrder {
 	private Long id;
 	private Long userId;

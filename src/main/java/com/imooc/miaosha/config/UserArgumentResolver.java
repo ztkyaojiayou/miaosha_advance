@@ -9,23 +9,27 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import com.imooc.miaosha.access.UserContext;
-import com.imooc.miaosha.domain.MiaoshaUser;
-import com.imooc.miaosha.service.MiaoshaUserService;
+import com.imooc.miaosha.bean.MiaoshaUser;
+import com.imooc.miaosha.service.LoginService;
 
+//自定义解析器
+//需要实现HandlerMethodArgumentResolver接口
 @Service
 public class UserArgumentResolver implements HandlerMethodArgumentResolver {
 
 	@Autowired
-	MiaoshaUserService userService;
-	
+	LoginService userService;
+
+	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> clazz = parameter.getParameterType();
 		return clazz==MiaoshaUser.class;
 	}
 
+	@Override
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-		return UserContext.getUser();
+		return UserContext.getUser();//获取用户信息
 	}
 
 }

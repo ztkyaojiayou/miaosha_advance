@@ -20,7 +20,7 @@ public class RedisService {
 	JedisPool jedisPool;
 	
 	/**
-	 * 获取当个对象
+	 * 获取单个对象
 	 * */
 	public <T> T get(KeyPrefix prefix, String key,  Class<T> clazz) {
 		 Jedis jedis = null;
@@ -37,7 +37,7 @@ public class RedisService {
 	}
 	
 	/**
-	 * 设置对象
+	 * 设置/创建对象
 	 * */
 	public <T> boolean set(KeyPrefix prefix, String key,  T value) {
 		 Jedis jedis = null;
@@ -62,7 +62,7 @@ public class RedisService {
 	}
 	
 	/**
-	 * 判断key是否存在
+	 * 判断key（商品）是否存在
 	 * */
 	public <T> boolean exists(KeyPrefix prefix, String key) {
 		 Jedis jedis = null;
@@ -108,7 +108,7 @@ public class RedisService {
 	}
 	
 	/**
-	 * 减少值
+	 * 减少一个值（减库存）
 	 * */
 	public <T> Long decr(KeyPrefix prefix, String key) {
 		 Jedis jedis = null;
@@ -116,7 +116,7 @@ public class RedisService {
 			 jedis =  jedisPool.getResource();
 			//生成真正的key
 			 String realKey  = prefix.getPrefix() + key;
-			return  jedis.decr(realKey);
+			return  jedis.decr(realKey);//调用jedis，减1
 		 }finally {
 			  returnToPool(jedis);
 		 }
@@ -170,7 +170,7 @@ public class RedisService {
 			}
 		}
 	}
-	
+	//把bean对象转化为string对象
 	public static <T> String beanToString(T value) {
 		if(value == null) {
 			return null;
@@ -187,6 +187,7 @@ public class RedisService {
 		}
 	}
 
+	//把string对象转化为bean对象
 	@SuppressWarnings("unchecked")
 	public static <T> T stringToBean(String str, Class<T> clazz) {
 		if(str == null || str.length() <= 0 || clazz == null) {
